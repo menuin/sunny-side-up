@@ -45,6 +45,9 @@ document
   .getElementById("arc")
   .setAttribute("d", `M ${AC.x} ${AC.y} A ${C.r} ${C.r} 0 0 0 ${BC.x} ${BC.y}`);
 
+const compoundPath = `M ${C.x} ${C.y} L ${AC.x} ${AC.y} A ${C.r} ${C.r} 0 0 0 ${BC.x} ${BC.y} Z`;
+document.getElementById("shape").setAttribute("d", compoundPath);
+
 // https://observablehq.com/@mbostock/tangent-to-two-circles
 function place(a, b, c) {
   const x_ba = b.x - a.x;
