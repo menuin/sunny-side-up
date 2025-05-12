@@ -101,6 +101,18 @@ class Circle {
     this.y = y;
     this.r = r;
   }
+
+  draw() {
+    const circle = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "circle"
+    );
+    circle.setAttribute("cx", this.x);
+    circle.setAttribute("cy", this.y);
+    circle.setAttribute("r", this.r);
+    circle.setAttribute("fill", "white");
+    svg.appendChild(circle);
+  }
 }
 
 const A = new Circle(320, 250, 50);
@@ -121,38 +133,6 @@ const B_AB = new Circle(
   2
 );
 
-document.getElementById("circle-a").setAttribute("cx", A.x);
-document.getElementById("circle-a").setAttribute("cy", A.y);
-document.getElementById("circle-a").setAttribute("r", A.r);
-
-document.getElementById("circle-b").setAttribute("cx", B.x);
-document.getElementById("circle-b").setAttribute("cy", B.y);
-document.getElementById("circle-b").setAttribute("r", B.r);
-
-document.getElementById("circle-c").setAttribute("cx", C.x);
-document.getElementById("circle-c").setAttribute("cy", C.y);
-document.getElementById("circle-c").setAttribute("r", C.r);
-
-document.getElementById("circle-ab").setAttribute("cx", AB.x);
-document.getElementById("circle-ab").setAttribute("cy", AB.y);
-document.getElementById("circle-ab").setAttribute("r", AB.r);
-
-document.getElementById("circle-ac").setAttribute("cx", AC.x);
-document.getElementById("circle-ac").setAttribute("cy", AC.y);
-document.getElementById("circle-ac").setAttribute("r", AC.r);
-
-document.getElementById("circle-bc").setAttribute("cx", BC.x);
-document.getElementById("circle-bc").setAttribute("cy", BC.y);
-document.getElementById("circle-bc").setAttribute("r", BC.r);
-
-document.getElementById("dot-a_ab").setAttribute("cx", A_AB.x);
-document.getElementById("dot-a_ab").setAttribute("cy", A_AB.y);
-document.getElementById("dot-a_ab").setAttribute("r", A_AB.r);
-
-document.getElementById("dot-b_ab").setAttribute("cx", B_AB.x);
-document.getElementById("dot-b_ab").setAttribute("cy", B_AB.y);
-document.getElementById("dot-b_ab").setAttribute("r", B_AB.r);
-
 document
   .getElementById("arc")
   .setAttribute(
@@ -160,6 +140,9 @@ document
     `M ${A_AB.x} ${A_AB.y} A ${AB.r} ${AB.r} 0 0 0 ${B_AB.x} ${B_AB.y}`
   );
 
+A.draw();
+B.draw();
+C.draw();
 drawArcPolygon(A, B, AB);
 drawArcPolygon(C, A, AC);
 drawArcPolygon(B, C, BC);
