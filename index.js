@@ -95,11 +95,77 @@ const addIncircleToTriangle = (A, B, C) => {
   svg.appendChild(circle);
 };
 
+function addWigglingIncircle(A, B, C) {
+  const distance = (p1, p2) => Math.hypot(p2.x - p1.x, p2.y - p1.y);
+
+  const a = distance(B, C);
+  const b = distance(C, A);
+  const c = distance(A, B);
+  const s = (a + b + c) / 2;
+  const area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
+  const r = area / s;
+
+  // 기본 incenter
+  const incenter = {
+    x: (a * A.x + b * B.x + c * C.x) / (a + b + c),
+    y: (a * A.y + b * B.y + c * C.y) / (a + b + c),
+  };
+
+  // 반지름 기반 가중 이동 (큰 원 쪽으로)
+  const totalR = A.r + B.r + C.r;
+  const offsetX = (A.x * A.r + B.x * B.r + C.x * C.r) / totalR - incenter.x;
+  const offsetY = (A.y * A.r + B.y * B.r + C.y * C.r) / totalR - incenter.y;
+
+  const shiftFactor = 1; // 이동 비율 제한
+  const shiftedIncenter = {
+    x: incenter.x + offsetX * shiftFactor,
+    y: incenter.y + offsetY * shiftFactor,
+  };
+
+  const circle = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "circle"
+  );
+  circle.setAttribute("cx", shiftedIncenter.x);
+  circle.setAttribute("cy", shiftedIncenter.y);
+  circle.setAttribute("r", r);
+  circle.setAttribute("stroke", "#fecf3d");
+  circle.setAttribute("fill", "#fecf3d");
+  circle.setAttribute("stroke-width", 1.5);
+  svg.appendChild(circle);
+}
+
+const animate = () => {
+  svg.innerHTML = ""; // 매 프레임 SVG 초기화
+
+  A.update();
+  B.update();
+  C.update();
+
+  A.draw(svg);
+  B.draw(svg);
+  C.draw(svg);
+
+  const AB = place(A, B, { r: 200 });
+  const AC = place(C, A, { r: 200 });
+  const BC = place(B, C, { r: 200 });
+
+  drawArcPolygon(A, B, AB);
+  drawArcPolygon(C, A, AC);
+  drawArcPolygon(B, C, BC);
+  drawTriangleBetweenCircles(A, B, C);
+  addWigglingIncircle(A, B, C);
+
+  requestAnimationFrame(animate);
+};
 class Circle {
-  constructor(x, y, r) {
+  constructor(x, y, r, dr = 0.5, min = 20, max = 100) {
     this.x = x;
     this.y = y;
     this.r = r;
+    this.dr = dr; // 반지름 변화량 (양수 or 음수)
+    this.min = min;
+    this.max = max;
   }
 
   draw() {
@@ -113,38 +179,23 @@ class Circle {
     circle.setAttribute("fill", "white");
     svg.appendChild(circle);
   }
+
+  update() {
+    this.r += this.dr;
+    if (this.r > this.max || this.r < this.min) {
+      this.dr *= -1; // 방향 반전
+    }
+  }
 }
 
-const A = new Circle(320, 250, 50);
-const B = new Circle(500, 305, 50);
-const C = new Circle(400, 400, 90);
+const A = new Circle(320, 250, 50, 0.7); // 점점 커졌다 작아짐
+const B = new Circle(500, 305, 60, -0.5); // 반대로 작아졌다 커짐
+const C = new Circle(400, 400, 70, 0.2); // 느리게 변화
+
 // const C = place(A, B, { r: 50 - Math.cos(Date.now() / 5000) * 14 });
-const AB = place(A, B, { r: 200 });
-const AC = place(C, A, { r: 200 });
-const BC = place(B, C, { r: 200 });
-const A_AB = new Circle(
-  (A.r * AB.x + AB.r * A.x) / (A.r + AB.r),
-  (A.r * AB.y + AB.r * A.y) / (A.r + AB.r),
-  2
-);
-const B_AB = new Circle(
-  (B.r * AB.x + AB.r * B.x) / (B.r + AB.r),
-  (B.r * AB.y + AB.r * B.y) / (B.r + AB.r),
-  2
-);
 
-document
-  .getElementById("arc")
-  .setAttribute(
-    "d",
-    `M ${A_AB.x} ${A_AB.y} A ${AB.r} ${AB.r} 0 0 0 ${B_AB.x} ${B_AB.y}`
-  );
+// A.draw();
+// B.draw();
+// C.draw();
 
-A.draw();
-B.draw();
-C.draw();
-drawArcPolygon(A, B, AB);
-drawArcPolygon(C, A, AC);
-drawArcPolygon(B, C, BC);
-drawTriangleBetweenCircles(A, B, C);
-addIncircleToTriangle(A, B, C);
+animate(A, B, C);
